@@ -1,0 +1,39 @@
+---
+title: "Portfolio Part 1 Plan"
+author: "Dalton Garcia"
+format: 
+  html: 
+    embed-resources: true
+  
+---
+
+## Data Description
+
+1)  My data source is from tidytuesdays and it is a set on Himalayan climbing expeditions.
+
+2)  The three datasets consist of Himalayan peak, expedition, and members information. We will only be focusing on the peak and expedition datasets.
+
+3)  My research questions that I hope to answer are:
+
+  i)  What Himalayan peaks have the highest summit/survival rate? (Which mountains have been climbed the most with the least amount of deaths?)
+  ii) What time of the year has the most successful summits? (No injuries/deaths)
+  iii) What peak has the quickest average successful summits?
+
+## Data Visualization
+
+1)  
+  i)  Interactive bar chart that displays sucessful summit rate and has the statistics of \# of summits and \# of deaths when hovered on.
+  ii) Heatmap by month with a gradient color palette denoting an increase of deaths/accidents.
+  iii) Perhaps 1 visualization of the quickest summits and then 1 visualization of the safest summits. \
+
+2) I want to highlight the peaks that have the least amount of accidents and the time of year that has the least amount of accidents. I plan to do that by making my main focus of each visualization to be these issues.
+
+3) I will need to do some data cleaning to filter certain outcomes of each expedition and create a number of new variables from the existing data in the set.
+
+## Data Cleaning
+
+3)  Do you need to filter your data? How? I will have to filter my expeditions by termination reason. For those expedition of success, I must filter this variable to only include those. This also applies for the expeditions where anyone got injured or died.
+
+4)  Do you need to create any new variables? What variables? How? Yes, I need to create a duration variable. I will take the difference of the "highpoint_date"/termination_date" and basecamp_data" to find the duration of the trek.
+
+5)  Do you need to add new data (join) to your data? What data? How? I must join my peak dataset with my expedition dataset. I will do this with a left join with the "peak_name" variable.
