@@ -1,9 +1,7 @@
 ---
-title: "Portfolio Part 1 Plan"
+title: "Portfolio Part 2 Plan"
 author: "Dalton Garcia"
-format: 
-  html: 
-    embed-resources: true
+
   
 ---
 
@@ -37,3 +35,77 @@ format:
 4)  Do you need to create any new variables? What variables? How? Yes, I need to create a duration variable. I will take the difference of the "highpoint_date"/termination_date" and basecamp_data" to find the duration of the trek.
 
 5)  Do you need to add new data (join) to your data? What data? How? I must join my peak dataset with my expedition dataset. I will do this with a left join with the "peak_name" variable.
+
+
+## Part 1- Data Cleaning
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+#| label: load-in-data
+#laoding in Tidy Tuesday Data
+members <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2020/2020-09-22/members.csv')
+expeditions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2020/2020-09-22/expeditions.csv')
+peaks <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2020/2020-09-22/peaks.csv')
+#write.csv(members, "data-raw/members.csv")
+#write.csv(expeditions, "data-raw/expeditions.csv")
+#write.csv(peaks, "data-raw/peaks.csv")
+```
+
+```{r}
+#| label: cleaning-data
+
+glimpse(expeditions)
+#added columns denoting if climb was successful or if any deaths occurred
+expeditions <- expeditions |>
+  mutate(climb_success = case_when(
+    termination_reason == "Success (main peak)" ~ 1,
+    termination_reason == "Success (subpeak)" ~ 1,
+    termination_reason == "Success (claimed)" ~ 1,
+    .default = 0),
+          death_on_exp = if_else(member_deaths + hired_staff_deaths > 0, 1, 0))
+            
+#joined peaks and expeditions dataset to add height of peaks, dropped unused columns         
+peak_expeditions <- expeditions |>
+  left_join(peaks |> select(peak_name, height_metres), by = c('peak_name')) |>
+  select(-oxygen_used, trekking_agency)
+
+
+#successful summits creating length of trek to summit from basecamp
+successful_expeditions <-  peak_expeditions |>
+  filter(climb_success == 1) |>
+  mutate(duration_to_summit = as.numeric(highpoint_date - basecamp_date))
+  
+```
+
+
+```{r}
+#| label: bar-plot-summit-rate
+#summit rate depends on things like weather, running out of food, turning back for various reasons, aka not reaching the top
+peak_expeditions |>
+  group_by(peak_name) |>
+  summarize(total_expeditions = n(),
+            successful_treks = sum(climb_success),
+            death_on_trek = sum(death_on_exp)) |>
+  mutate(summit_rate = successful_treks/total_expeditions,
+         death_rate = death_on_trek/total_expeditions) |>
+  filter(total_expeditions >= 50) |>
+  arrange(desc(total_expeditions)) |>
+  head(10) |>
+  
+  #top 10 peaks by total # of expeditions
+  ggplot(aes(x = fct_reorder(peak_name, total_expeditions, .desc = TRUE), y = total_expeditions, fill = peak_name)) +
+  geom_col() +
+  scale_fill_brewer(palette = "Set3") +
+  labs(
+    title = "Most Popular Himalayan Peaks by Total Expeditions (1905-2019)",
+    x = "Peak Name",
+    y = "Number of Expeditions"
+  )  +
+  theme_bw() +
+  theme(legend.position = "none")
+
+```
+
